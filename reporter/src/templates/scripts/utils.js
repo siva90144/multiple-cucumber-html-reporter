@@ -21,4 +21,33 @@ window.ReportUtils = {
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
   },
+
+  /**
+   * Translates a label key using the map inlined into window.ReportConfig by
+   * the page template. The report has to work from file://, so the labels are
+   * embedded in the page rather than fetched.
+   *
+   * Falls back to the key itself, matching the server-side `t` filter.
+   */
+  t: (key, ...args) => {
+    const labels = (window.ReportConfig && window.ReportConfig.labels) || {};
+    const value = labels[key] || key;
+    if (args.length === 0) return value;
+    return value.replace(/\{(\d+)\}/g, (match, index) => {
+      const arg = args[Number(index)];
+      return arg === undefined || arg === null ? match : String(arg);
+    });
+  },
+
+  /**
+   * The six status names in the fixed order the charts rely on.
+   */
+  statusLabels: () => [
+    window.ReportUtils.t('status.passed'),
+    window.ReportUtils.t('status.failed'),
+    window.ReportUtils.t('status.ambiguous'),
+    window.ReportUtils.t('status.notDefined'),
+    window.ReportUtils.t('status.pending'),
+    window.ReportUtils.t('status.skipped'),
+  ],
 };

@@ -9,6 +9,7 @@
     "migrate-to-latest",
     "cli",
     "options",
+    "localization",
     "metadata",
     "faq",
     "attachments",

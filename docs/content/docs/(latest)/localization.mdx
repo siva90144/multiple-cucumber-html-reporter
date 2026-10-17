@@ -1,0 +1,136 @@
+---
+title: Localization
+description: Translate the report into another language, or re-word individual labels.
+icon: Languages
+---
+
+Every label in the generated report can be translated or re-worded. There are two ways in, and they compose: pick a bundled language with `locale`, and override individual strings with `labels`.
+
+## Translating the report
+
+```js
+const report = require('multiple-cucumber-html-reporter');
+
+report.generate({
+  jsonDir: './reports',
+  reportPath: './reports/html',
+  locale: 'pt-BR',
+});
+```
+
+Or from a config file, which is what most CLI users will reach for:
+
+```json title=".multiple-cucumber-html-reporter.json"
+{
+  "jsonDir": "./reports",
+  "reportPath": "./reports/html",
+  "locale": "pt-BR"
+}
+```
+
+The CLI also takes a flag, which wins over the config file:
+
+```bash
+mchr --locale pt-BR
+```
+
+Because JSON and YAML configs support environment interpolation, one suite can produce reports in different languages per pipeline:
+
+```json
+{ "locale": "${REPORT_LOCALE}" }
+```
+
+### Supported locales
+
+| Tag | Language |
+| --- | --- |
+| `en` | English (default) |
+| `pt-BR` | Portuguese (Brazil) |
+
+Tag matching is case-insensitive, and a region subtag narrows to its base language — `en-US`, `en-GB` and `en-AU` all resolve to `en`.
+
+<Callout title='Dialects are never guessed' type='warn'>
+  Narrowing only ever goes from specific to general. Passing `pt` throws an error naming `pt-BR` rather than selecting it, because European and Brazilian Portuguese differ enough that picking one for you would be wrong as often as it was right.
+</Callout>
+
+## Re-wording individual labels
+
+`labels` overrides single keys on top of whatever `locale` is active. Use it to match your team's vocabulary without translating anything:
+
+```js
+report.generate({
+  jsonDir: './reports',
+  reportPath: './reports/html',
+  labels: {
+    'table.featureName': 'Test Suite',
+    'feature.scenarios': 'Test Cases',
+  },
+});
+```
+
+It also layers onto a translation, for terms where your team's idiom differs from the bundled wording:
+
+```js
+report.generate({
+  jsonDir: './reports',
+  reportPath: './reports/html',
+  locale: 'pt-BR',
+  labels: { 'status.notDefined': 'Não implementado' },
+});
+```
+
+### How a label is resolved
+
+For each key, the last layer that supplies a value wins:
+
+```text
+built-in English  →  selected locale  →  your labels
+```
+
+Only English is guaranteed complete. A locale that has not translated every key falls back to English for the rest, so a partial translation never renders as blank or `undefined`. The same applies to product and personal names, which bundled locales deliberately leave untranslated.
+
+## Label keys
+
+Keys are grouped by the part of the report they appear in.
+
+| Prefix | Covers |
+| --- | --- |
+| `status.*` | The six status names: passed, failed, ambiguous, not defined, pending, skipped |
+| `dashboard.*` | Chart card titles on the overview page |
+| `table.*` | Features table headers, toolbar, legend, empty state, pagination |
+| `runInfo.*` | Run information card field labels |
+| `feature.*` | Feature detail page: breadcrumb, chart titles, status filter buttons |
+| `scenario.*` | Scenario cards, attachment names, modal title |
+| `modal.*` | Attachment modal controls |
+| `chart.*` | Chart series names and donut centre totals |
+| `meta.*` | Page title, header, footer attribution |
+
+`status.*` is shared on purpose: those six words appear in the table legend, the feature page tiles and the charts, and overriding the key updates all of them together.
+
+Some labels take positional placeholders, written `{0}`, `{1}` and so on:
+
+```js
+labels: {
+  'table.showingEntries': 'Rows {0}–{1} of {2}',
+  'scenario.attachmentScreenshot': 'Screen capture - {0}',
+}
+```
+
+An unrecognized key renders as the key itself rather than failing the build, which makes typos visible in the report.
+
+<Callout title='reportName, pageTitle and pageFooter take precedence' type='info'>
+  The `meta.*` labels supply the *defaults* for the header, document title and footer. If you also set [`reportName`](/docs/options), `pageTitle` or `pageFooter`, those win — they are more specific.
+</Callout>
+
+## Contributing a translation
+
+Locales live in `reporter/src/i18n/locales/`. To add one:
+
+1. Copy `en.ts` to a new file named after the tag in lowercase, e.g. `de.ts` or `pt-pt.ts`.
+2. Type it as `Partial<ReportLabels>` and translate the values. Leave out any key you are unsure of — it falls back to English.
+3. Register it in `reporter/src/i18n/index.ts`: add the tag to `SUPPORTED_LOCALES` and the module to `registry`.
+4. Add the tag to `SupportedLocale` in `reporter/src/types.ts`.
+
+Adding the tag to `SUPPORTED_LOCALES` is what updates the CLI `--locale` choices, the `--help` text and the validation error message, so there is no separate list to maintain.
+
+Two things worth knowing while translating. Labels under `feature.filter*` are rendered in capitals by the design, so translate them in capitals rather than relying on CSS — `text-transform` mangles Turkish dotted and dotless *i* and German *ß*. And German and Portuguese labels tend to run noticeably longer than English, so check the feature page status tiles and the table headers for overflow.

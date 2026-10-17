@@ -8,15 +8,15 @@
     <!-- Top row - Key metrics status -->
     <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
       <div class="rounded-xl border bg-card text-card-foreground shadow p-6">
-        <h3 class="text-sm font-semibold mb-4 text-muted-foreground uppercase tracking-wider">Features Status</h3>
+        <h3 class="text-sm font-semibold mb-4 text-muted-foreground uppercase tracking-wider">{{ 'dashboard.featuresStatus' | t }}</h3>
         <div id="features-chart" class="h-64"></div>
       </div>
       <div class="rounded-xl border bg-card text-card-foreground shadow p-6">
-        <h3 class="text-sm font-semibold mb-4 text-muted-foreground uppercase tracking-wider">Scenarios Status</h3>
+        <h3 class="text-sm font-semibold mb-4 text-muted-foreground uppercase tracking-wider">{{ 'dashboard.scenariosStatus' | t }}</h3>
         <div id="scenarios-chart" class="h-64"></div>
       </div>
       <div class="rounded-xl border bg-card text-card-foreground shadow p-6">
-        <h3 class="text-sm font-semibold mb-4 text-muted-foreground uppercase tracking-wider">Steps Status</h3>
+        <h3 class="text-sm font-semibold mb-4 text-muted-foreground uppercase tracking-wider">{{ 'dashboard.stepsStatus' | t }}</h3>
         <div id="steps-status-chart" class="h-64"></div>
       </div>
     </div>
@@ -24,22 +24,22 @@
     <!-- Analytics Charts -->
     <div class="grid gap-6 lg:grid-cols-3">
       <div class="rounded-xl border bg-card text-card-foreground shadow p-6">
-        <h3 class="text-sm font-semibold mb-4 text-muted-foreground uppercase tracking-wider">Device & OS</h3>
+        <h3 class="text-sm font-semibold mb-4 text-muted-foreground uppercase tracking-wider">{{ 'dashboard.deviceOs' | t }}</h3>
         <div id="device-os-chart" class="h-64"></div>
       </div>
       <div class="rounded-xl border bg-card text-card-foreground shadow p-6">
-        <h3 class="text-sm font-semibold mb-4 text-muted-foreground uppercase tracking-wider">Browsers</h3>
+        <h3 class="text-sm font-semibold mb-4 text-muted-foreground uppercase tracking-wider">{{ 'dashboard.browsers' | t }}</h3>
         <div id="browser-chart" class="h-64"></div>
       </div>
       <div class="rounded-xl border bg-card text-card-foreground shadow p-6">
-        <h3 class="text-sm font-semibold mb-4 text-muted-foreground uppercase tracking-wider">Top 10 Tags</h3>
+        <h3 class="text-sm font-semibold mb-4 text-muted-foreground uppercase tracking-wider">{{ 'dashboard.topTags' | t }}</h3>
         <div id="tag-distribution-chart" class="h-64"></div>
       </div>
     </div>
 
     <!-- Status Trend -->
     <div class="rounded-xl border bg-card text-card-foreground shadow p-6">
-      <h3 class="text-sm font-semibold mb-4 text-muted-foreground uppercase tracking-wider">Features Status Trend</h3>
+      <h3 class="text-sm font-semibold mb-4 text-muted-foreground uppercase tracking-wider">{{ 'dashboard.featuresStatusTrend' | t }}</h3>
       <div id="status-trend-chart" class="h-80 w-full"></div>
     </div>
 
@@ -56,7 +56,8 @@
         modalBackdrop: {{ data.report.modalBackdrop | json }},
         modalDraggable: {{ data.report.modalDraggable | json }},
         modalResizable: {{ data.report.modalResizable | json }},
-        modalShowContext: {{ data.report.modalShowContext | json }}
+        modalShowContext: {{ data.report.modalShowContext | json }},
+        labels: {{ clientLabels | json }}
     });
 
     // Embedded data for charts

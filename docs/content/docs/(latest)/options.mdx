@@ -265,6 +265,38 @@ Multiple Cucumber HTML Reporter offers a wide range of configuration options to 
   }}
 />
 
+## Localization Options
+
+<TypeTable
+  type={{
+    locale: {
+      description: (
+        <>
+          Language used for the report's labels. Matching is case-insensitive and narrows to the base language, so <code>en-US</code> and <code>en-GB</code> both resolve to <code>en</code>. An unrecognized tag throws an error listing the supported values rather than silently falling back.
+
+          <Callout title='Why not just `pt`?' type='info'>
+            A base language is never widened into a regional dialect. Passing <code>pt</code> throws instead of selecting <code>pt-BR</code>, because European and Brazilian Portuguese differ enough that choosing one would be a guess.
+          </Callout>
+        </>
+      ),
+      type: "'en' | 'pt-BR'",
+      default: 'en',
+      typeDescription: "'en' | 'pt-BR'"
+    },
+    labels: {
+      description: (
+        <>
+          Overrides for individual report labels, applied on top of the selected <code>locale</code>. Use this to re-word the report without translating it, or to adjust a few terms within a bundled locale. Keys not listed keep their value from the locale.
+
+          See <a href='/docs/localization'>Localization</a> for the full list of label keys.
+        </>
+      ),
+      type: 'Partial<ReportLabels>',
+      typeDescription: "{ 'table.featureName': 'Test Suite' }"
+    },
+  }}
+/>
+
 ## Custom Styling Options
 
 <TypeTable

@@ -89,12 +89,12 @@ window.ReportScenarios = {
 
       const titleSpan = document.createElement('span');
       titleSpan.className = 'text-[10px] font-bold text-muted-foreground uppercase px-1';
-      titleSpan.textContent = 'Tags';
+      titleSpan.textContent = window.ReportUtils.t('table.tags');
 
       const clearBtn = document.createElement('button');
       clearBtn.type = 'button';
       clearBtn.className = 'clear-tags-btn text-[10px] font-bold text-primary hover:underline px-1 cursor-pointer';
-      clearBtn.textContent = 'Clear';
+      clearBtn.textContent = window.ReportUtils.t('table.clear');
 
       headerDiv.appendChild(titleSpan);
       headerDiv.appendChild(clearBtn);
@@ -141,7 +141,7 @@ window.ReportScenarios = {
           cb.checked = false;
         });
         selectedTags = [];
-        filterLabel.textContent = 'Filter by tags...';
+        filterLabel.textContent = window.ReportUtils.t('table.filterByTags');
         filterLabel.classList.add('text-muted-foreground');
         applyFilters();
       });
@@ -151,7 +151,7 @@ window.ReportScenarios = {
         selectedTags = Array.from(checkedBoxes).map((cb) => cb.value);
 
         if (selectedTags.length === 0) {
-          filterLabel.textContent = 'Filter by tags...';
+          filterLabel.textContent = window.ReportUtils.t('table.filterByTags');
           filterLabel.classList.add('text-muted-foreground');
         } else {
           filterLabel.textContent = selectedTags.join(', ');

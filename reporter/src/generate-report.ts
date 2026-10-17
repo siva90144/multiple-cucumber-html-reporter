@@ -9,6 +9,7 @@ import { DateTime, Duration } from 'luxon';
 import open from 'open';
 import { v4 as uuid } from 'uuid';
 import collectJSONS, { listJsonFiles } from './collect-jsons.js';
+import { pickClientLabels, resolveLabels, resolveLocale, translate } from './i18n/index.js';
 import { createLogger } from './logger.js';
 import { applyMetadataAndHooks, enrichStepEmbeddings, escapeHtml, type MediaFileWriter } from './report-helpers.js';
 import {
@@ -19,13 +20,16 @@ import {
 import type {
   CustomData,
   Feature,
+  LabelKey,
   LoggingOptions,
   LogLevel,
   Metadata,
   Options,
+  ReportLabels,
   Scenario,
   Step,
   Suite,
+  SupportedLocale,
 } from './types.js';
 
 const { size } = _;
@@ -36,6 +40,18 @@ const __dirname = dirname(__filename);
 const engine = new Liquid({
   root: join(__dirname, 'templates'),
   extname: '.liquid',
+});
+
+/**
+ * Translates a label key, e.g. `{{ 'status.passed' | t }}`.
+ *
+ * The label map is read from the render context rather than captured at engine
+ * construction, because `generate()` may be called more than once in a process
+ * with a different `locale` each time.
+ */
+engine.registerFilter('t', function (key: string, ...args: unknown[]): string {
+  const labels = this.context.getSync(['labels']) as ReportLabels | undefined;
+  return labels ? translate(labels, key, ...args) : key;
 });
 
 const INDEX_HTML = 'index.html';
@@ -196,6 +212,13 @@ async function generateReport(options: Options) {
     );
   }
   const attachmentLayout = options.attachmentLayout ?? 'modal';
+
+  // Throws on an unrecognised tag; `en-US`-style inputs narrow to `en`.
+  const locale: SupportedLocale = resolveLocale(options.locale);
+  const labels: ReportLabels = resolveLabels(options.locale, options.labels);
+  const renderOptions = { globals: { labels, clientLabels: pickClientLabels(labels), locale } };
+  logger.debug('Resolved report labels.', { locale, overrides: Object.keys(options.labels ?? {}).length });
+
   const modalBackdrop = options.modalBackdrop ?? true;
   const modalDraggable = options.modalDraggable ?? false;
   const modalResizable = options.modalResizable ?? false;
@@ -234,7 +257,10 @@ async function generateReport(options: Options) {
     humanReadableDuration,
     displayChartPercentages,
     durationAggregation,
-    durationColumnTitle: durationAggregation === 'wallClock' ? 'Duration (wall clock)' : 'Duration',
+    durationColumnTitle: translate(
+      labels,
+      durationAggregation === 'wallClock' ? 'table.durationWallClock' : 'table.duration',
+    ),
     browser: 0,
     name: '',
     version: 'version',
@@ -843,10 +869,14 @@ async function generateReport(options: Options) {
       report,
     };
 
-    const html = await engine.renderFile('index', {
-      data,
-      base_url: '.',
-    });
+    const html = await engine.renderFile(
+      'index',
+      {
+        data,
+        base_url: '.',
+      },
+      renderOptions,
+    );
 
     await fs.writeFile(featuresOverviewIndex, html);
     logger.debug('Wrote report overview page.', { file: featuresOverviewIndex });
@@ -947,10 +977,14 @@ async function generateReport(options: Options) {
       inlineCss,
     };
 
-    const html = await engine.renderFile('email', {
-      data,
-      base_url: '.',
-    });
+    const html = await engine.renderFile(
+      'email',
+      {
+        data,
+        base_url: '.',
+      },
+      renderOptions,
+    );
 
     await fs.writeFile(emailReportFile, html);
     logger.debug('Wrote emailable report page.', { file: emailReportFile });
@@ -1059,10 +1093,14 @@ async function generateReport(options: Options) {
           },
         };
 
-        const htmlStream = await engine.renderFileToNodeStream('feature', {
-          data,
-          base_url: '..',
-        });
+        const htmlStream = await engine.renderFileToNodeStream(
+          'feature',
+          {
+            data,
+            base_url: '..',
+          },
+          renderOptions,
+        );
 
         await streamPipeline(htmlStream, fs.createWriteStream(featurePage));
         logger.trace('Wrote feature page.', { feature: feature.name, featureId: feature.id, file: featurePage });
@@ -1246,4 +1284,4 @@ async function loadMetadataFile(filePath: string): Promise<
 }
 
 export const generate = generateReport;
-export type { CustomData, LoggingOptions, LogLevel, Metadata, Options };
+export type { CustomData, LabelKey, LoggingOptions, LogLevel, Metadata, Options, ReportLabels, SupportedLocale };

@@ -169,7 +169,7 @@ window.ReportModal = {
           <div class="flex-1 min-h-0 flex items-center justify-center bg-slate-900 rounded p-2">
             <video controls class="max-w-full max-h-full rounded shadow-2xl" autoplay>
               <source src="${content}" type="${type}">
-              Your browser does not support the video tag.
+              ${window.ReportUtils.t('modal.videoUnsupported')}
             </video>
           </div>
         </div>`;
@@ -192,10 +192,10 @@ window.ReportModal = {
         <div class="flex flex-col h-full overflow-hidden">
           <div class="shrink-0 flex flex-col gap-1 px-4 py-2 bg-slate-800 rounded-t border-b border-slate-700">
             <div class="flex items-center justify-between">
-              <span class="text-slate-300 text-xs font-semibold uppercase tracking-wider">Console Log</span>
+              <span class="text-slate-300 text-xs font-semibold uppercase tracking-wider">${window.ReportUtils.t('modal.consoleLog')}</span>
               <button onclick="window.ReportModal.copyLog()" id="copy-btn" class="flex items-center gap-1.5 px-3 py-1 text-slate-300 hover:text-white hover:bg-slate-700 rounded transition-all text-xs font-medium">
                 <i class="fa-solid fa-copy"></i>
-                <span>Copy Log</span>
+                <span>${window.ReportUtils.t('modal.copyLog')}</span>
               </button>
             </div>
             ${
@@ -216,10 +216,10 @@ window.ReportModal = {
       html = `
         <div class="flex flex-col h-full overflow-hidden">
           <div class="shrink-0 flex items-center justify-between px-4 py-2 bg-red-950/40 rounded-t border-b border-red-500/20">
-            <span class="text-red-400 text-xs font-semibold uppercase tracking-wider">Error Details & Stack Trace</span>
+            <span class="text-red-400 text-xs font-semibold uppercase tracking-wider">${window.ReportUtils.t('modal.errorDetails')}</span>
             <button onclick="window.ReportModal.copyLog()" id="copy-btn" class="flex items-center gap-1.5 px-3 py-1 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded transition-all text-xs font-medium">
               <i class="fa-solid fa-copy"></i>
-              <span>Copy Error</span>
+              <span>${window.ReportUtils.t('modal.copyError')}</span>
             </button>
           </div>
           <div class="flex-1 min-h-0 bg-slate-950 text-red-400/90 p-4 rounded-b font-mono text-[10px] md:text-sm overflow-auto leading-relaxed">
@@ -256,7 +256,7 @@ window.ReportModal = {
         const btn = document.getElementById('copy-btn');
         if (btn) {
           const originalInner = btn.innerHTML;
-          btn.innerHTML = `<i class="fa-solid fa-check text-green-400"></i><span class="text-green-400">Copied!</span>`;
+          btn.innerHTML = `<i class="fa-solid fa-check text-green-400"></i><span class="text-green-400">${window.ReportUtils.t('modal.copied')}</span>`;
           setTimeout(() => (btn.innerHTML = originalInner), 2000);
         }
       });

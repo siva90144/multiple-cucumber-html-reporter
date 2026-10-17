@@ -1,6 +1,7 @@
+{%- assign default_page_title = 'meta.pageTitle' | t -%}
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{{ report.pageTitle | default: 'Cucumber Test Report' }}</title>
+<title>{{ report.pageTitle | default: default_page_title }}</title>
 <link
   rel="icon"
   type="image/x-icon"

@@ -1,3 +1,5 @@
+import type { en } from './i18n/locales/en.js';
+
 export type CustomData = {
   username?: string;
   nodeVersion?: string;
@@ -39,6 +41,19 @@ export type Metadata = {
 };
 
 export type LogLevel = 'silent' | 'error' | 'warn' | 'info' | 'debug' | 'trace';
+
+/**
+ * BCP-47 tags for the locales bundled with the reporter. Kept in step with the
+ * runtime `SUPPORTED_LOCALES` array in `src/i18n/index.ts` by a `satisfies`
+ * clause there.
+ */
+export type SupportedLocale = 'en' | 'pt-BR';
+
+/** Every label key the report can render. Derived from the English locale. */
+export type LabelKey = keyof typeof en;
+
+/** A complete set of report labels. Translations may supply a `Partial`. */
+export type ReportLabels = Record<LabelKey, string>;
 
 export type LoggingOptions =
   | LogLevel
@@ -97,6 +112,22 @@ export interface Options {
   /** @deprecated Use `logging: 'silent'` or `logging: false` instead. */
   disableLog?: boolean;
   openReportInBrowser?: boolean;
+  /**
+   * Language used for the report's labels. Defaults to `en`.
+   *
+   * Matching is case-insensitive and narrows to the base language, so
+   * `en-US` and `en-GB` both resolve to `en`. An unrecognised tag throws
+   * rather than silently falling back.
+   */
+  locale?: SupportedLocale;
+  /**
+   * Overrides for individual report labels, applied on top of the selected
+   * `locale`. Use this to re-word the report without translating it, or to
+   * adjust a few terms in a bundled locale.
+   *
+   * Example: `{ 'table.featureName': 'Test Suite' }`
+   */
+  labels?: Partial<ReportLabels>;
   reportName?: string;
   saveCollectedJSON?: boolean;
   displayDuration?: boolean;

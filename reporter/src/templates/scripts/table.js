@@ -78,12 +78,12 @@ window.ReportTable = {
 
     const platformIcon = (platform = 'local') => {
       if (platform === 'browserstack') {
-        return '<span title="BrowserStack"><i class="fa-solid fa-cloud text-base"></i></span>';
+        return `<span title="${window.ReportUtils.t('table.browserStack')}"><i class="fa-solid fa-cloud text-base"></i></span>`;
       }
       if (platform === 'testmu') {
-        return '<span title="TestMu AI"><i class="fa-solid fa-cloud text-base"></i></span>';
+        return `<span title="${window.ReportUtils.t('table.testMu')}"><i class="fa-solid fa-cloud text-base"></i></span>`;
       }
-      return '<span title="Local machine"><i class="fa-solid fa-computer text-base"></i></span>';
+      return `<span title="${window.ReportUtils.t('table.localMachine')}"><i class="fa-solid fa-computer text-base"></i></span>`;
     };
 
     const renderTable = () => {
@@ -96,7 +96,7 @@ window.ReportTable = {
           const total = (feature.passed || 0) + (feature.failed || 0) + (feature.ambiguous || 0) + (feature.notDefined || 0) + (feature.pending || 0) + (feature.skipped || 0);
           const passPercentage = total > 0 ? Math.round((feature.passed / total) * 100) : 0;
 
-          const device = feature.device || 'Desktop';
+          const device = feature.device || window.ReportUtils.t('table.desktop');
           const os = feature.os || '';
           const browser = feature.browser || '';
           const deviceIcon = iconForDevice(device);
@@ -139,12 +139,12 @@ window.ReportTable = {
                   ${feature.skipped > 0 ? `<div class="h-full bg-status-skipped" style="width: ${(feature.skipped / total) * 100}%"></div>` : ''}
                 </div>
                 <div class="mt-1 flex flex-wrap gap-x-2 gap-y-0.5 text-[10px] font-medium uppercase">
-                  <span class="text-status-passed">${feature.passed} Passed</span>
-                  <span class="text-status-failed">${feature.failed} Failed</span>
-                  ${feature.ambiguous > 0 ? `<span class="text-status-ambiguous">${feature.ambiguous} Ambiguous</span>` : ''}
-                  ${feature.notDefined > 0 ? `<span class="text-status-undefined">${feature.notDefined} Not Defined</span>` : ''}
-                  ${feature.pending > 0 ? `<span class="text-status-pending">${feature.pending} Pending</span>` : ''}
-                  <span class="text-status-skipped">${feature.skipped} Skipped</span>
+                  <span class="text-status-passed">${feature.passed} ${window.ReportUtils.t('status.passed')}</span>
+                  <span class="text-status-failed">${feature.failed} ${window.ReportUtils.t('status.failed')}</span>
+                  ${feature.ambiguous > 0 ? `<span class="text-status-ambiguous">${feature.ambiguous} ${window.ReportUtils.t('status.ambiguous')}</span>` : ''}
+                  ${feature.notDefined > 0 ? `<span class="text-status-undefined">${feature.notDefined} ${window.ReportUtils.t('status.notDefined')}</span>` : ''}
+                  ${feature.pending > 0 ? `<span class="text-status-pending">${feature.pending} ${window.ReportUtils.t('status.pending')}</span>` : ''}
+                  <span class="text-status-skipped">${feature.skipped} ${window.ReportUtils.t('status.skipped')}</span>
                 </div>
               </td>
               <td class="px-4 md:px-6 py-4 text-right whitespace-nowrap">
@@ -313,12 +313,12 @@ window.ReportTable = {
 
       const titleSpan = document.createElement('span');
       titleSpan.className = 'text-[10px] font-bold text-muted-foreground uppercase px-1';
-      titleSpan.textContent = 'Tags';
+      titleSpan.textContent = window.ReportUtils.t('table.tags');
 
       const clearBtn = document.createElement('button');
       clearBtn.type = 'button';
       clearBtn.className = 'clear-tags-btn text-[10px] font-bold text-primary hover:underline px-1 cursor-pointer';
-      clearBtn.textContent = 'Clear';
+      clearBtn.textContent = window.ReportUtils.t('table.clear');
 
       headerDiv.appendChild(titleSpan);
       headerDiv.appendChild(clearBtn);
@@ -365,7 +365,7 @@ window.ReportTable = {
           cb.checked = false;
         });
         selectedTags = [];
-        filterLabel.textContent = 'Filter by tags...';
+        filterLabel.textContent = window.ReportUtils.t('table.filterByTags');
         filterLabel.classList.add('text-muted-foreground');
         applyAllFilters();
       });
@@ -375,7 +375,7 @@ window.ReportTable = {
         selectedTags = Array.from(checkedBoxes).map((cb) => cb.value);
 
         if (selectedTags.length === 0) {
-          filterLabel.textContent = 'Filter by tags...';
+          filterLabel.textContent = window.ReportUtils.t('table.filterByTags');
           filterLabel.classList.add('text-muted-foreground');
         } else {
           filterLabel.textContent = selectedTags.join(', ');

@@ -18,8 +18,9 @@ import * as p from '@clack/prompts';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { generate } from '../generate-report.js';
+import { SUPPORTED_LOCALES } from '../i18n/index.js';
 import { LOG_LEVELS } from '../logger.js';
-import type { LogLevel, Options } from '../types.js';
+import type { LogLevel, Options, SupportedLocale } from '../types.js';
 import { loadConfig } from './config-loader.js';
 import { runOnboarding } from './onboarding.js';
 
@@ -54,6 +55,11 @@ async function main(): Promise<void> {
       default: false,
       description: 'Generate an emailable HTML report summary (email-report.html)',
     })
+    .option('locale', {
+      type: 'string',
+      description: `Language used for the report labels (${SUPPORTED_LOCALES.join(', ')})`,
+      choices: SUPPORTED_LOCALES as unknown as string[],
+    })
     .option('log-level', {
       alias: 'l',
       type: 'string',
@@ -83,6 +89,7 @@ async function main(): Promise<void> {
         '    "jsonDir": "./reports",',
         '    "reportPath": "./reports/html",',
         '    "reportName": "My Test Report",',
+        '    "locale": "en",',
         '    "logging": "warn",',
         '    "displayDuration": true,',
         '    "displayChartPercentages": true',
@@ -138,6 +145,11 @@ async function main(): Promise<void> {
   const rawLogLevel = argv['log-level'] as LogLevel | undefined;
   if (rawLogLevel) {
     options.logging = rawLogLevel;
+  }
+
+  const rawLocale = argv.locale as SupportedLocale | undefined;
+  if (rawLocale) {
+    options.locale = rawLocale;
   }
 
   configResult.options = options;

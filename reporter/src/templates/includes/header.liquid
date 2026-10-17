@@ -1,3 +1,5 @@
+{%- assign default_report_name = 'meta.reportName' | t -%}
+{%- assign default_subtitle = 'meta.reportSubtitle' | t -%}
 <header class="border-b bg-background px-4 md:px-6 py-4 sticky top-0 z-40 backdrop-blur supports-backdrop-filter:bg-background/60">
   <div class="mx-auto max-w-7xl flex items-center justify-between gap-4">
     <div class="flex items-center gap-3 truncate">
@@ -5,7 +7,7 @@
         {% if data.report.logo %}
           <img
             src="{{ base_url | default: "." }}/assets/{{ data.report.logo }}"
-            alt="Logo"
+            alt="{{ 'meta.logoAlt' | t }}"
             class="h-full w-full object-cover"
           >
         {% else %}
@@ -14,10 +16,10 @@
       </div>
       <div class="text-balance">
         <h1 class="text-lg md:text-2xl font-bold text-foreground text-balance tracking-tight">
-          {{ data.report.reportName | default: 'Cucumber Report' }}
+          {{ data.report.reportName | default: default_report_name }}
         </h1>
         <p class="mt-0.5 text-[10px] md:text-xs text-muted-foreground uppercase font-bold tracking-widest opacity-70">
-          {{ data.report.pageTitle | default: 'Automated Execution Insights' }}
+          {{ data.report.pageTitle | default: default_subtitle }}
         </p>
       </div>
     </div>
