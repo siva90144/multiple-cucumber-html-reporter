@@ -160,7 +160,7 @@
                       {% if attachment.name -%}
                         {{- attachment.name | escape -}}
                       {%- else -%}
-                        {{- 'scenario.attachmentIndexed' | t: forloop.index -}}
+                        {{- 'scenario.attachmentIndexed' | t: index: forloop.index -}}
                       {%- endif %}
                     </button>
                   {% endfor %}
@@ -313,7 +313,7 @@
                       <div
                         class="flex items-center justify-between gap-2 bg-background p-2 rounded border border-muted/50 text-xs hover:border-primary/50 transition-colors cursor-pointer modal-trigger"
                         data-attachment-type="screenshot"
-                        data-attachment-name="{% if att_name %}{{ att_name | escape }}{% else %}{{ 'scenario.attachmentScreenshot' | t: forloop.index }}{% endif %}"
+                        data-attachment-name="{% if att_name %}{{ att_name | escape }}{% else %}{{ 'scenario.attachmentScreenshot' | t: index: forloop.index }}{% endif %}"
                         data-attachment-content="{{ item }}"
                         {% if report.modalShowContext %}
                           data-step-context="{{ step.keyword | append: step.name | escape }}"
@@ -327,7 +327,7 @@
                             {%- if att_name -%}
                               {{- att_name | escape -}}
                             {%- else -%}
-                              {{- 'scenario.attachmentScreenshotListed' | t: forloop.index -}}
+                              {{- 'scenario.attachmentScreenshot' | t: index: forloop.index -}}
                             {%- endif -%}
                           </span>
                         </div>
@@ -347,7 +347,7 @@
                       <div
                         class="flex items-center justify-between gap-2 bg-background p-2 rounded border border-muted/50 text-xs hover:border-primary/50 transition-colors cursor-pointer modal-trigger"
                         data-attachment-type="log"
-                        data-attachment-name="{% if att_name %}{{ att_name | escape }}{% else %}{{ 'scenario.attachmentLog' | t: forloop.index }}{% endif %}"
+                        data-attachment-name="{% if att_name %}{{ att_name | escape }}{% else %}{{ 'scenario.attachmentLog' | t: index: forloop.index }}{% endif %}"
                         data-attachment-content="{{ item | escape }}"
                         {% if report.modalShowContext %}
                           data-step-context="{{ step.keyword | append: step.name | escape }}"
@@ -358,7 +358,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                           </svg>
                           <span class="font-medium cursor-pointer">
-                            {%- if att_name %}{{ att_name | escape }}{% else %}{{ 'scenario.attachmentLogListed' | t: forloop.index }}{% endif -%}
+                            {%- if att_name %}{{ att_name | escape }}{% else %}{{ 'scenario.attachmentLog' | t: index: forloop.index }}{% endif -%}
                           </span>
                         </div>
                         <svg
@@ -392,7 +392,7 @@
                         class="flex items-center justify-between gap-2 bg-background p-2 rounded border border-muted/50 text-xs hover:border-primary/50 transition-colors cursor-pointer modal-trigger"
                         data-attachment-type="html"
                         data-is-video="{{ is_video_html }}"
-                        data-attachment-name="{% if att_name %}{{ att_name | escape }}{% elsif is_video_html %}{% if step.html.size > 1 %}{{ 'scenario.attachmentVideoIndexed' | t: forloop.index }}{% else %}{{ 'scenario.attachmentVideo' | t }}{% endif %}{% else %}{{ 'scenario.attachmentHtml' | t: forloop.index }}{% endif %}"
+                        data-attachment-name="{% if att_name %}{{ att_name | escape }}{% elsif is_video_html %}{% if step.html.size > 1 %}{{ 'scenario.attachmentVideoIndexed' | t: index: forloop.index }}{% else %}{{ 'scenario.attachmentVideo' | t }}{% endif %}{% else %}{{ 'scenario.attachmentHtml' | t: index: forloop.index }}{% endif %}"
                         data-attachment-content="{{ item | escape }}"
                         {% if report.modalShowContext %}
                           data-step-context="{{ step.keyword | append: step.name | escape }}"
@@ -415,9 +415,9 @@
                             {%- if att_name -%}
                               {{- att_name | escape -}}
                             {%- elsif is_video_html -%}
-                              {%- if step.html.size > 1 %}{{ 'scenario.attachmentVideoListed' | t: forloop.index }}{% else %}{{ 'scenario.attachmentVideo' | t }}{% endif -%}
+                              {%- if step.html.size > 1 %}{{ 'scenario.attachmentVideoIndexed' | t: index: forloop.index }}{% else %}{{ 'scenario.attachmentVideo' | t }}{% endif -%}
                             {%- else -%}
-                              {{- 'scenario.attachmentHtmlListed' | t: forloop.index -}}
+                              {{- 'scenario.attachmentHtml' | t: index: forloop.index -}}
                             {%- endif -%}
                           </span>
                         </div>
@@ -437,7 +437,7 @@
                       <div
                         class="flex items-center justify-between gap-2 bg-background p-2 rounded border border-muted/50 text-xs hover:border-primary/50 transition-colors cursor-pointer modal-trigger"
                         data-attachment-type="video"
-                        data-attachment-name="{% if att_name %}{{ att_name | escape }}{% else %}{{ 'scenario.attachmentVideo' | t }} - {{ forloop.index }}{% endif %}"
+                        data-attachment-name="{% if att_name %}{{ att_name | escape }}{% else %}{{ 'scenario.attachmentVideoIndexed' | t: index: forloop.index }}{% endif %}"
                         data-attachment-content="{{ item }}"
                         {% if report.modalShowContext %}
                           data-step-context="{{ step.keyword | append: step.name | escape }}"
@@ -448,7 +448,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                           </svg>
                           <span class="font-medium cursor-pointer">
-                            {%- if att_name %}{{ att_name | escape }}{% else %}{{ 'scenario.attachmentVideoListed' | t: forloop.index }}{% endif -%}
+                            {%- if att_name %}{{ att_name | escape }}{% else %}{{ 'scenario.attachmentVideoIndexed' | t: index: forloop.index }}{% endif -%}
                           </span>
                         </div>
                         <svg
@@ -467,7 +467,7 @@
                       <div
                         class="flex items-center justify-between gap-2 bg-background p-2 rounded border border-muted/50 text-xs hover:border-primary/50 transition-colors cursor-pointer modal-trigger"
                         data-attachment-type="log"
-                        data-attachment-name="{% if att_name %}{{ att_name | escape }}{% else %}{{ 'scenario.attachmentJson' | t: forloop.index }}{% endif %}"
+                        data-attachment-name="{% if att_name %}{{ att_name | escape }}{% else %}{{ 'scenario.attachmentJson' | t: index: forloop.index }}{% endif %}"
                         data-attachment-content="{{ item | json | escape }}"
                       >
                         <div class="flex items-center gap-2">
@@ -475,7 +475,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
                           </svg>
                           <span class="font-medium cursor-pointer">
-                            {%- if att_name %}{{ att_name | escape }}{% else %}{{ 'scenario.attachmentJsonListed' | t: forloop.index }}{% endif -%}
+                            {%- if att_name %}{{ att_name | escape }}{% else %}{{ 'scenario.attachmentJson' | t: index: forloop.index }}{% endif -%}
                           </span>
                         </div>
                         <svg
@@ -493,7 +493,7 @@
                       <div
                         class="flex items-center justify-between gap-2 bg-background p-2 rounded border border-muted/50 text-xs hover:border-primary/50 transition-colors cursor-pointer modal-trigger"
                         data-attachment-type="{{ attachment.type }}"
-                        data-attachment-name="{% if attachment.name %}{{ attachment.name | escape }}{% else %}{{ 'scenario.attachmentGeneric' | t: forloop.index }}{% endif %}"
+                        data-attachment-name="{% if attachment.name %}{{ attachment.name | escape }}{% else %}{{ 'scenario.attachmentGeneric' | t: index: forloop.index }}{% endif %}"
                         data-attachment-content="{{ attachment.data }}"
                       >
                         <div class="flex items-center gap-2">
@@ -504,7 +504,7 @@
                             {%- if attachment.name -%}
                               {{- attachment.name | escape -}}
                             {%- else -%}
-                              {{- 'scenario.attachmentGenericListed' | t: forloop.index -}}
+                              {{- 'scenario.attachmentGeneric' | t: index: forloop.index -}}
                             {%- endif -%}
                           </span>
                         </div>

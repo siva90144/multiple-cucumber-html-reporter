@@ -246,10 +246,11 @@
   <!-- Pagination -->
   <div class="px-6 py-4 border-t flex items-center justify-between text-xs text-muted-foreground bg-muted/20">
     <div>
-      {%- capture showing_start %}<span id="showing-start" class="font-bold text-foreground">1</span>{% endcapture -%}
-      {%- capture showing_end %}<span id="showing-end" class="font-bold text-foreground">10</span>{% endcapture -%}
-      {%- capture total_records %}<span id="total-records" class="font-bold text-foreground">{{ data.features.size }}</span>{% endcapture -%}
-      {{ 'table.showingEntries' | t: showing_start, showing_end, total_records }}
+      {%- assign page_end = data.features.size | at_most: 10 -%}
+      {%- if data.features.size > 0 %}{% assign page_start = 1 %}{% else %}{% assign page_start = 0 %}{% endif -%}
+      <span id="pagination-summary">
+        {{- 'table.showingEntries' | t: start: page_start, end: page_end, count: data.features.size -}}
+      </span>
     </div>
     <div class="flex items-center gap-1" id="pagination-controls">
       <button

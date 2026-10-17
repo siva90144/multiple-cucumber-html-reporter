@@ -1,7 +1,6 @@
 import path from 'node:path';
 import fs from 'fs-extra';
-import { CLIENT_LABEL_KEYS, pickClientLabels, resolveLabels } from '@/i18n/index.js';
-import { en } from '@/i18n/locales/en.js';
+import { CLIENT_LABEL_KEYS, englishLabels as en, pickClientLabels, resolveLabels } from '@/i18n/index.js';
 
 describe('i18n client label subset', () => {
   const scriptsDir = path.resolve(process.cwd(), 'src/templates/scripts');
@@ -11,7 +10,7 @@ describe('i18n client label subset', () => {
     const found = new Set<string>();
     for (const file of fs.readdirSync(scriptsDir).filter((f) => f.endsWith('.js'))) {
       const source = fs.readFileSync(path.join(scriptsDir, file), 'utf-8');
-      for (const match of source.matchAll(/ReportUtils\.t\('([^']+)'\)/g)) {
+      for (const match of source.matchAll(/ReportUtils\.t\('([^']+)'/g)) {
         found.add(match[1]);
       }
     }

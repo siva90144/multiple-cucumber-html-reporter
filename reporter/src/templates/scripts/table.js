@@ -10,9 +10,7 @@ window.ReportTable = {
     const prevBtn = document.getElementById('prev-page');
     const nextBtn = document.getElementById('next-page');
     const pageNumbersContainer = document.getElementById('page-numbers');
-    const showingStart = document.getElementById('showing-start');
-    const showingEnd = document.getElementById('showing-end');
-    const totalRecordsLabel = document.getElementById('total-records');
+    const paginationSummary = document.getElementById('pagination-summary');
 
     if (!tableBody || !data.features) return;
 
@@ -171,9 +169,15 @@ window.ReportTable = {
         })
         .join('');
 
-      showingStart.textContent = filteredFeatures.length === 0 ? 0 : start + 1;
-      showingEnd.textContent = end;
-      totalRecordsLabel.textContent = filteredFeatures.length;
+      // Rebuilt as one string rather than patching numbers in place, so the
+      // plural form stays correct when filtering changes the count.
+      if (paginationSummary) {
+        paginationSummary.textContent = window.ReportUtils.t('table.showingEntries', {
+          start: filteredFeatures.length === 0 ? 0 : start + 1,
+          end: end,
+          count: filteredFeatures.length,
+        });
+      }
 
       renderPagination();
       updateSortIcons();

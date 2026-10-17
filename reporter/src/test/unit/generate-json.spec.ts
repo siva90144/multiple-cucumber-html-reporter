@@ -595,7 +595,9 @@ describe('generate-report.js', () => {
       expect(featureHtml).toContain('data-is-video="true"');
       expect(featureHtml).toContain('data-attachment-name="Video"');
       expect(featureHtml).toContain('data-is-video="false"');
-      expect(featureHtml).toContain('data-attachment-name="HTML - 1"');
+      // Attachment labels are no longer hyphenated in the attribute: the modal
+      // title and the visible list label now share one key.
+      expect(featureHtml).toContain('data-attachment-name="HTML 1"');
     });
 
     it('should show a "+ Video" link and a scenario-recording caption in inline layout, and "+ Show Info" for the plain html attachment', async () => {

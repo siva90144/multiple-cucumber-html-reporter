@@ -27,14 +27,29 @@ window.ReportUtils = {
    * the page template. The report has to work from file://, so the labels are
    * embedded in the page rather than fetched.
    *
-   * Falls back to the key itself, matching the server-side `t` filter.
+   * Mirrors the server-side translator: named {name} placeholders, plural
+   * selection from params.count via Intl.PluralRules, and an unknown key
+   * rendering as the key itself.
+   *
+   *   ReportUtils.t('status.passed')
+   *   ReportUtils.t('table.showingEntries', { start: 1, end: 10, count: 42 })
    */
-  t: (key, ...args) => {
-    const labels = (window.ReportConfig && window.ReportConfig.labels) || {};
-    const value = labels[key] || key;
-    if (args.length === 0) return value;
-    return value.replace(/\{(\d+)\}/g, (match, index) => {
-      const arg = args[Number(index)];
+  t: (key, params) => {
+    const config = window.ReportConfig || {};
+    const value = (config.labels || {})[key];
+    if (value === undefined) return key;
+
+    const args = params || {};
+    let template = value;
+
+    if (typeof value !== 'string') {
+      const locale = config.locale || 'en';
+      const category = new Intl.PluralRules(locale).select(Number(args.count || 0));
+      template = value[category] || value.other || Object.values(value)[0] || '';
+    }
+
+    return template.replace(/\{(\w+)\}/g, (match, name) => {
+      const arg = args[name];
       return arg === undefined || arg === null ? match : String(arg);
     });
   },

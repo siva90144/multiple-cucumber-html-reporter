@@ -1,5 +1,11 @@
-import { DEFAULT_LOCALE, resolveLabels, resolveLocale, SUPPORTED_LOCALES, translate } from '@/i18n/index.js';
-import { en } from '@/i18n/locales/en.js';
+import {
+  createTranslator,
+  DEFAULT_LOCALE,
+  englishLabels as en,
+  resolveLabels,
+  resolveLocale,
+  SUPPORTED_LOCALES,
+} from '@/i18n/index.js';
 import type { ReportLabels } from '@/types.js';
 
 describe('i18n locale resolution', () => {
@@ -64,8 +70,15 @@ describe('i18n label resolution', () => {
   it('should fall back to English for keys a locale does not translate', () => {
     const labels = resolveLabels('pt-BR');
     for (const key of Object.keys(en)) {
-      expect(typeof labels[key as keyof ReportLabels]).toBe('string');
-      expect(labels[key as keyof ReportLabels].length).toBeGreaterThan(0);
+      const value = labels[key as keyof ReportLabels];
+      expect(value).toBeDefined();
+      // Plural labels resolve to an object of forms rather than a bare string.
+      const forms = typeof value === 'string' ? [value] : Object.values(value);
+      expect(forms.length).toBeGreaterThan(0);
+      for (const form of forms) {
+        expect(typeof form).toBe('string');
+        expect((form as string).length).toBeGreaterThan(0);
+      }
     }
   });
 
@@ -90,26 +103,53 @@ describe('i18n label resolution', () => {
   });
 });
 
-describe('i18n translate', () => {
-  const labels = resolveLabels('en');
+describe('i18n translator', () => {
+  const t = createTranslator(resolveLabels('en'), 'en');
 
   it('should look up a known key', () => {
-    expect(translate(labels, 'status.passed')).toBe('Passed');
+    expect(t('status.passed')).toBe('Passed');
   });
 
   it('should return the key itself when it is unknown', () => {
-    expect(translate(labels, 'does.not.exist')).toBe('does.not.exist');
+    expect(t('does.not.exist')).toBe('does.not.exist');
   });
 
-  it('should substitute positional placeholders', () => {
-    expect(translate(labels, 'table.showingEntries', 1, 10, 42)).toBe('Showing 1 to 10 of 42 entries');
+  it('should substitute named placeholders', () => {
+    expect(t('scenario.attachmentScreenshot', { index: 3 })).toBe('Screenshot 3');
   });
 
-  it('should leave a placeholder in place when no argument is supplied for it', () => {
-    expect(translate(labels, 'table.showingEntries', 1, 10)).toBe('Showing 1 to 10 of {2} entries');
+  it('should leave a placeholder in place when no value is supplied for it', () => {
+    expect(t('scenario.attachmentScreenshot')).toBe('Screenshot {index}');
   });
 
   it('should not alter a string that has no placeholders', () => {
-    expect(translate(labels, 'status.failed', 'unused')).toBe('Failed');
+    expect(t('status.failed', { index: 9 })).toBe('Failed');
+  });
+
+  it('should select the singular form at a count of one', () => {
+    // The previous implementation rendered "of 1 entries" here.
+    expect(t('table.showingEntries', { start: 1, end: 1, count: 1 })).toBe('Showing 1 to 1 of 1 entry');
+  });
+
+  it('should select the plural form for other counts', () => {
+    expect(t('table.showingEntries', { start: 1, end: 10, count: 42 })).toBe('Showing 1 to 10 of 42 entries');
+    expect(t('table.showingEntries', { start: 0, end: 0, count: 0 })).toBe('Showing 0 to 0 of 0 entries');
+  });
+
+  it("should use the locale's own plural categories, not English ones", () => {
+    // Russian distinguishes one/few/many where English has only one/other.
+    const forms = { one: '{count} запись', few: '{count} записи', many: '{count} записей' };
+    const ru = createTranslator({ ...resolveLabels('en'), 'table.showingEntries': forms }, 'ru');
+    expect(ru('table.showingEntries', { count: 1 })).toBe('1 запись');
+    expect(ru('table.showingEntries', { count: 2 })).toBe('2 записи');
+    expect(ru('table.showingEntries', { count: 5 })).toBe('5 записей');
+  });
+
+  it('should fall back to another plural form when the needed category is absent', () => {
+    const partial = createTranslator(
+      { ...resolveLabels('en'), 'table.showingEntries': { other: '{count} items' } },
+      'en',
+    );
+    expect(partial('table.showingEntries', { count: 1 })).toBe('1 items');
   });
 });

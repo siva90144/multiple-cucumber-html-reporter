@@ -103,34 +103,63 @@ Keys are grouped by the part of the report they appear in.
 | `scenario.*` | Scenario cards, attachment names, modal title |
 | `modal.*` | Attachment modal controls |
 | `chart.*` | Chart series names and donut centre totals |
-| `meta.*` | Page title, header, footer attribution |
+| `meta.*` | Document title, header subtitle, footer wording |
 
 `status.*` is shared on purpose: those six words appear in the table legend, the feature page tiles and the charts, and overriding the key updates all of them together.
 
-Some labels take positional placeholders, written `{0}`, `{1}` and so on:
+### Placeholders
+
+Some labels take named placeholders, so you can see what each one means and reorder them freely:
 
 ```js
 labels: {
-  'table.showingEntries': 'Rows {0}–{1} of {2}',
-  'scenario.attachmentScreenshot': 'Screen capture - {0}',
+  'table.showingEntries': 'Rows {start}\u2013{end} of {count}',
+  'scenario.attachmentScreenshot': 'Screen capture {index}',
 }
 ```
 
-An unrecognized key renders as the key itself rather than failing the build, which makes typos visible in the report.
+An unrecognized key renders as the key itself rather than failing the build, which makes typos visible in the report. A placeholder with no supplied value is left as-is for the same reason.
+
+### Plural forms
+
+A label can supply plural variants instead of a single string. The form is chosen by the `count` placeholder using the runtime's own CLDR data via `Intl.PluralRules`, so each language gets exactly the categories it defines — two for English, three for Portuguese, four for Russian and Polish, six for Arabic:
+
+```json
+{
+  "ru": {
+    "table.showingEntries": {
+      "one": "\u041f\u043e\u043a\u0430\u0437\u0430\u043d\u0430 {count} \u0437\u0430\u043f\u0438\u0441\u044c",
+      "few": "\u041f\u043e\u043a\u0430\u0437\u0430\u043d\u043e {count} \u0437\u0430\u043f\u0438\u0441\u0438",
+      "many": "\u041f\u043e\u043a\u0430\u0437\u0430\u043d\u043e {count} \u0437\u0430\u043f\u0438\u0441\u0435\u0439",
+      "other": "\u041f\u043e\u043a\u0430\u0437\u0430\u043d\u043e {count} \u0437\u0430\u043f\u0438\u0441\u0438"
+    }
+  }
+}
+```
+
+No plural data is bundled with the reporter — it comes from the JavaScript runtime. A translation that supplies only some categories falls back to `other`, so it still renders something sensible.
+
+<Callout title='Your language may need forms English does not' type='info'>
+  English needs only `one` and `other`, so a label written as a plain string is often fine for it. If your language distinguishes more cases, convert the label to the object form in your locale — you do not need to change the English entry.
+</Callout>
 
 <Callout title='reportName, pageTitle and pageFooter take precedence' type='info'>
-  The `meta.*` labels supply the *defaults* for the header, document title and footer. If you also set [`reportName`](/docs/options), `pageTitle` or `pageFooter`, those win — they are more specific.
+  The `meta.*` labels supply the *defaults* for the document title, header subtitle and footer. If you also set [`reportName`](/docs/options), `pageTitle` or `pageFooter`, those win — they are more specific.
+
+  The reporter's own name and its author are not labels: they are proper nouns and are never translated.
 </Callout>
 
 ## Contributing a translation
 
-Locales live in `reporter/src/i18n/locales/`. To add one:
+All translations live in one file, `reporter/src/i18n/report-languages.json`, in the same spirit as Gherkin's own `gherkin-languages.json`. To add a language:
 
-1. Copy `en.ts` to a new file named after the tag in lowercase, e.g. `de.ts` or `pt-pt.ts`.
-2. Type it as `Partial<ReportLabels>` and translate the values. Leave out any key you are unsure of — it falls back to English.
-3. Register it in `reporter/src/i18n/index.ts`: add the tag to `SUPPORTED_LOCALES` and the module to `registry`.
-4. Add the tag to `SupportedLocale` in `reporter/src/types.ts`.
+1. Add a top-level entry keyed by its BCP-47 tag, copying the `en` block as a starting point.
+2. Translate the values. Leave out any key you are unsure of — it falls back to English, so a partial translation is welcome.
 
-Adding the tag to `SUPPORTED_LOCALES` is what updates the CLI `--locale` choices, the `--help` text and the validation error message, so there is no separate list to maintain.
+That is the whole change: one file, no code. Both the `SupportedLocale` type and the runtime `SUPPORTED_LOCALES` list are derived from this file's keys, and they feed the CLI `--locale` choices, the `--help` text and the validation error message. There is no second place to register a language and nothing that can fall out of step.
+
+A single JSON file also means translation platforms such as Crowdin, Weblate and Transifex can consume the file directly.
+
+Three checks run in CI and will catch the common mistakes: a key that English does not define (usually a typo), an empty value, and a translation that drops a `{0}` placeholder English uses.
 
 Two things worth knowing while translating. Labels under `feature.filter*` are rendered in capitals by the design, so translate them in capitals rather than relying on CSS — `text-transform` mangles Turkish dotted and dotless *i* and German *ß*. And German and Portuguese labels tend to run noticeably longer than English, so check the feature page status tiles and the table headers for overflow.

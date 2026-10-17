@@ -1,5 +1,3 @@
-import type { en } from './i18n/locales/en.js';
-
 export type CustomData = {
   username?: string;
   nodeVersion?: string;
@@ -43,17 +41,34 @@ export type Metadata = {
 export type LogLevel = 'silent' | 'error' | 'warn' | 'info' | 'debug' | 'trace';
 
 /**
- * BCP-47 tags for the locales bundled with the reporter. Kept in step with the
- * runtime `SUPPORTED_LOCALES` array in `src/i18n/index.ts` by a `satisfies`
- * clause there.
+ * BCP-47 tags for the locales bundled with the reporter, derived from the keys
+ * of `i18n/report-languages.json`. Adding a language to that file extends this
+ * union automatically, so the two can never drift apart.
  */
-export type SupportedLocale = 'en' | 'pt-BR';
+export type SupportedLocale = keyof typeof import('./i18n/report-languages.json');
 
-/** Every label key the report can render. Derived from the English locale. */
-export type LabelKey = keyof typeof en;
+/**
+ * Every label key the report can render, derived from the English entry in
+ * `i18n/report-languages.json`. This is a type-only reference, so no runtime
+ * import of the JSON is emitted here.
+ */
+export type LabelKey = keyof typeof import('./i18n/report-languages.json')['en'];
+
+/**
+ * Plural variants of a label, keyed by CLDR plural category. Resolved at render
+ * time against a `count` parameter via `Intl.PluralRules`, so each locale gets
+ * exactly the categories its language defines.
+ */
+export type PluralForms = Partial<Record<Intl.LDMLPluralRule, string>>;
+
+/** A label is either a plain string or a set of plural variants. */
+export type LabelValue = string | PluralForms;
+
+/** Values substituted into a label's `{name}` placeholders. */
+export type TranslateParams = Record<string, string | number>;
 
 /** A complete set of report labels. Translations may supply a `Partial`. */
-export type ReportLabels = Record<LabelKey, string>;
+export type ReportLabels = Record<LabelKey, LabelValue>;
 
 export type LoggingOptions =
   | LogLevel

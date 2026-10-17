@@ -9,7 +9,7 @@ import { DateTime, Duration } from 'luxon';
 import open from 'open';
 import { v4 as uuid } from 'uuid';
 import collectJSONS, { listJsonFiles } from './collect-jsons.js';
-import { pickClientLabels, resolveLabels, resolveLocale, translate } from './i18n/index.js';
+import { createTranslator, pickClientLabels, resolveLabels, resolveLocale } from './i18n/index.js';
 import { createLogger } from './logger.js';
 import { applyMetadataAndHooks, enrichStepEmbeddings, escapeHtml, type MediaFileWriter } from './report-helpers.js';
 import {
@@ -30,6 +30,7 @@ import type {
   Step,
   Suite,
   SupportedLocale,
+  TranslateParams,
 } from './types.js';
 
 const { size } = _;
@@ -45,13 +46,32 @@ const engine = new Liquid({
 /**
  * Translates a label key, e.g. `{{ 'status.passed' | t }}`.
  *
- * The label map is read from the render context rather than captured at engine
- * construction, because `generate()` may be called more than once in a process
- * with a different `locale` each time.
+ * Takes named arguments, which LiquidJS hands over as `[name, value]` pairs:
+ *
+ *   {{ 'table.showingEntries' | t: start: 1, end: 10, count: 42 }}
+ *
+ * A `count` argument also selects the plural form for locales whose label
+ * supplies one.
+ *
+ * The label map and locale are read from the render context rather than
+ * captured at engine construction, because `generate()` may be called more
+ * than once in a process with a different `locale` each time.
  */
 engine.registerFilter('t', function (key: string, ...args: unknown[]): string {
   const labels = this.context.getSync(['labels']) as ReportLabels | undefined;
-  return labels ? translate(labels, key, ...args) : key;
+  if (!labels) {
+    return key;
+  }
+
+  const locale = (this.context.getSync(['locale']) as string | undefined) ?? 'en';
+  const params: TranslateParams = {};
+  for (const arg of args) {
+    if (Array.isArray(arg) && arg.length === 2) {
+      params[String(arg[0])] = arg[1] as string | number;
+    }
+  }
+
+  return createTranslator(labels, locale)(key, params);
 });
 
 const INDEX_HTML = 'index.html';
@@ -175,7 +195,11 @@ async function generateReport(options: Options) {
 
   const durationAggregation = options.durationAggregation === 'wallClock' ? 'wallClock' : 'sum';
   const hideMetadata = !!options.hideMetadata;
-  const pageTitle = options.pageTitle || DEFAULT_REPORT_NAME;
+  // Deliberately NOT defaulted to DEFAULT_REPORT_NAME: leaving it undefined lets
+  // the templates fall back to the localisable `meta.pageTitle` (document title)
+  // and `meta.reportSubtitle` (header subtitle). Previously both rendered the
+  // product name, so the subtitle duplicated the H1 and neither could translate.
+  const pageTitle = options.pageTitle;
   const pageFooter = options.pageFooter || null;
   const useCDN = !!options.useCDN;
   const staticFilePath = !!options.staticFilePath;
@@ -216,6 +240,7 @@ async function generateReport(options: Options) {
   // Throws on an unrecognised tag; `en-US`-style inputs narrow to `en`.
   const locale: SupportedLocale = resolveLocale(options.locale);
   const labels: ReportLabels = resolveLabels(options.locale, options.labels);
+  const t = createTranslator(labels, locale);
   const renderOptions = { globals: { labels, clientLabels: pickClientLabels(labels), locale } };
   logger.debug('Resolved report labels.', { locale, overrides: Object.keys(options.labels ?? {}).length });
 
@@ -257,10 +282,7 @@ async function generateReport(options: Options) {
     humanReadableDuration,
     displayChartPercentages,
     durationAggregation,
-    durationColumnTitle: translate(
-      labels,
-      durationAggregation === 'wallClock' ? 'table.durationWallClock' : 'table.duration',
-    ),
+    durationColumnTitle: t(durationAggregation === 'wallClock' ? 'table.durationWallClock' : 'table.duration'),
     browser: 0,
     name: '',
     version: 'version',
